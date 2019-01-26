@@ -28,6 +28,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
 
 public class TOHGUI implements TOHRDelegate {
 
@@ -36,7 +37,6 @@ public class TOHGUI implements TOHRDelegate {
 
 	private int[][] statusBuffer;
 
-	private boolean isUpdating = false;
 	private boolean needsUpdate = false;
 
 	private boolean hasCancelled = false;
@@ -104,6 +104,7 @@ public class TOHGUI implements TOHRDelegate {
 		}
 
 	};
+	private JScrollPane scrollPane;
 
 	/**
 	 * Launch the application.
@@ -224,10 +225,15 @@ public class TOHGUI implements TOHRDelegate {
 		textFieldNSize = new JTextField();
 		panel_4.add(textFieldNSize);
 		textFieldNSize.setColumns(10);
-
+		
 		textAreaConsole = new JTextArea();
 		textAreaConsole.setEditable(false);
-		frmTimeMyTowers.getContentPane().add(textAreaConsole, BorderLayout.CENTER);
+		
+		scrollPane = new JScrollPane();
+		scrollPane.setViewportView(textAreaConsole);
+		frmTimeMyTowers.getContentPane().add(scrollPane, BorderLayout.CENTER);
+		
+		
 	}
 
 	private void execute(int start, int interval, int stepSize) {

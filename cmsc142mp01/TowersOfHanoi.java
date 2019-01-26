@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class TowersOfHanoi {
-	private String[] poleNames;
 	private TOHDelegate delegate;
 
 	public interface TOHDelegate {
@@ -17,11 +16,6 @@ public class TowersOfHanoi {
 
 	private void initialize(TOHDelegate delegate) {
 		this.delegate = delegate;
-		if (poleNames == null) {
-			String[] names = {"a", "b", "c"};
-			this.poleNames = names;
-		} else
-			this.poleNames = poleNames;
 	}
 
 	public long solve(int n) {
