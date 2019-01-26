@@ -11,11 +11,13 @@ public class TOHRunnable implements Runnable, TOHDelegate {
 
 	private TOHRDelegate delegate;
 	private int discs;
+	private TowersOfHanoi problem;
 
-	public TOHRunnable(TOHRDelegate delegate, int discs) {
+	public TOHRunnable(TOHRDelegate delegate, int discs, boolean silently) {
 		super();
 		this.delegate = delegate;
 		this.discs = discs;
+		this.problem = new TowersOfHanoi(this, silently);
 	}
 
 	@Override
@@ -25,7 +27,6 @@ public class TOHRunnable implements Runnable, TOHDelegate {
 
 	@Override
     public void run() {
-		TowersOfHanoi problem = new TowersOfHanoi(this);
 		long[] elapsed = new long[3];
 		delegate.updateStatus(discs, -1, 0, 0);
 		elapsed[0] = problem.solve(discs);

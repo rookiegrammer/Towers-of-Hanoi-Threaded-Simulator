@@ -5,17 +5,15 @@ import java.time.Instant;
 
 public class TowersOfHanoi {
 	private TOHDelegate delegate;
+	private boolean silent;
 
 	public interface TOHDelegate {
 		void println(int id, int pole1, int pole2);
 	}
 
-	public TowersOfHanoi(TOHDelegate delegate) {
-		initialize(delegate);
-	}
-
-	private void initialize(TOHDelegate delegate) {
+	public TowersOfHanoi(TOHDelegate delegate, boolean silent) {
 		this.delegate = delegate;
+		this.silent = silent;
 	}
 
 	public long solve(int n) {
@@ -27,13 +25,14 @@ public class TowersOfHanoi {
 		Instant start = Instant.now(); // Java 8 new thread-safe method
 
 		// Do solving
-		_solve(n, 1, 2, 3);
+		if (silent) __solve(n, 1, 2, 3);
+		else _solve(n, 1, 2, 3);
 
 		// Get time finished
 		Instant finish = Instant.now();
 
 		// Get running time
-	    long timeElapsed = Duration.between(start, finish).toMillis(); // Java 8 new thread-safe method
+	    long timeElapsed = Duration.between(start, finish).toNanos(); // Java 8 new thread-safe method
 
 		return timeElapsed;
 	}
@@ -50,5 +49,17 @@ public class TowersOfHanoi {
 			delegate.println(n, fromPole, toPole); // Move bottom disc to target pole
 			_solve(n-1, auxPole, fromPole, toPole); // Move top discs back to source pole
 		}
+	}
+	
+	// Silently Solve, No Prints, Recursion Only
+	private void __solve(int n, int fromPole, int auxPole, int toPole) {
+		
+		if (n == 1) // Move disc 1 fromPole -> toPole
+			return;	
+		
+		__solve(n-1, fromPole, toPole, auxPole); // Move top discs to aux
+		// Move disc n fromPole -> toPole
+		__solve(n-1, auxPole, fromPole, toPole); // Move top discs back to source pole
+		
 	}
 }

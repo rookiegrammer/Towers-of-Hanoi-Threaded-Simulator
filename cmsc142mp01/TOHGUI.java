@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,11 +28,12 @@ import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
+import javax.swing.JCheckBox;
 
 public class TOHGUI implements TOHRDelegate {
 
 	private JFrame frmTimeMyTowers;
-	private PrintWriter out;
+	private File file;
 
 	private int[][] statusBuffer;
 
@@ -73,7 +73,8 @@ public class TOHGUI implements TOHRDelegate {
 			for (int i=0; i<statusBufferSize; i++) {
 				int line = (i+lineNow)%statusBufferSize;
 				int[] status = statusBuffer[line];
-				if (status != null) {
+				
+				if (status != null && status[0] != 0) {
 					console += "TOH "+status[0]+": ";
 					switch (status[1]) {
 						case 0:
@@ -105,6 +106,7 @@ public class TOHGUI implements TOHRDelegate {
 
 	};
 	private JScrollPane scrollPane;
+	private JCheckBox chckbxSilent;
 
 	/**
 	 * Launch the application.
@@ -159,7 +161,6 @@ public class TOHGUI implements TOHRDelegate {
 					if (start <= 0 || stepSize <= 0 || stepSize > 0 && interval <= 0) return;
 
 					System.out.println("OK Let's Go!");
-					btnExecute.setText("Stop");
 
 					execute(start, interval, stepSize);
 				} else {
@@ -180,25 +181,29 @@ public class TOHGUI implements TOHRDelegate {
 		panel_1.setBorder(new EmptyBorder(0, 0, 0, 0));
 		panel.add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
+		
+		textFieldLines = new JTextField(statusBufferSize+"");
+		panel_1.add(textFieldLines, BorderLayout.CENTER);
+		textFieldLines.setColumns(10);
 
-		textFieldThreads = new JTextField(threadPoolSize+"");
-		panel_1.add(textFieldThreads, BorderLayout.CENTER);
-		textFieldThreads.setColumns(10);
+		JLabel lblNewLabel_1 = new JLabel("Lines Buffer ");
+		panel_1.add(lblNewLabel_1, BorderLayout.WEST);
 
-		JLabel lblNewLabel = new JLabel("Threads ");
-		panel_1.add(lblNewLabel, BorderLayout.WEST);
+		chckbxSilent = new JCheckBox("Silent (Recursions Only)");
+		panel_1.add(chckbxSilent, BorderLayout.EAST);
+		chckbxSilent.setSelected(true);
 
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new EmptyBorder(0, 0, 5, 0));
 		panel_1.add(panel_2, BorderLayout.NORTH);
 		panel_2.setLayout(new BorderLayout(0, 0));
+				
+		JLabel lblNewLabel = new JLabel("Threads ");
+		panel_2.add(lblNewLabel, BorderLayout.WEST);
 
-		JLabel lblNewLabel_1 = new JLabel("Lines Buffer ");
-		panel_2.add(lblNewLabel_1, BorderLayout.WEST);
-
-		textFieldLines = new JTextField(statusBufferSize+"");
-		panel_2.add(textFieldLines, BorderLayout.CENTER);
-		textFieldLines.setColumns(10);
+		textFieldThreads = new JTextField(threadPoolSize+"");
+		panel_2.add(textFieldThreads, BorderLayout.CENTER);
+		textFieldThreads.setColumns(10);
 
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -211,7 +216,7 @@ public class TOHGUI implements TOHRDelegate {
 
 		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(new EmptyBorder(5, 20, 5, 20));
-		panel_3.add(panel_4, BorderLayout.SOUTH);
+		panel_3.add(panel_4, BorderLayout.CENTER);
 		panel_4.setLayout(new GridLayout(1, 0, 0, 0));
 
 		textFieldNStart = new JTextField();
@@ -225,15 +230,15 @@ public class TOHGUI implements TOHRDelegate {
 		textFieldNSize = new JTextField();
 		panel_4.add(textFieldNSize);
 		textFieldNSize.setColumns(10);
-		
+
 		textAreaConsole = new JTextArea();
 		textAreaConsole.setEditable(false);
-		
+
 		scrollPane = new JScrollPane();
 		scrollPane.setViewportView(textAreaConsole);
 		frmTimeMyTowers.getContentPane().add(scrollPane, BorderLayout.CENTER);
-		
-		
+
+
 	}
 
 	private void execute(int start, int interval, int stepSize) {
@@ -242,46 +247,41 @@ public class TOHGUI implements TOHRDelegate {
 		JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
 		int returnValue = fileChooser.showSaveDialog(null);
+		
 
 		if (returnValue != JFileChooser.APPROVE_OPTION)
 			return;
 
-		File selectedFile = fileChooser.getSelectedFile();
+		file = fileChooser.getSelectedFile();
+		btnExecute.setText("Stop");
 
 		Thread branchedThread = new Thread() {
 			public void run() {
 				try {
+					boolean silent = chckbxSilent.isSelected();
 
 					// Get file
-					FileWriter fileWriter = new FileWriter(selectedFile);
-
 					updater = new Timer();
 					TimerTask timerTask = new TimerTask() {
 						public void run() {
 							updateTask.run();
 						};
 					};
-
 					updater.scheduleAtFixedRate(timerTask, updateDelay, updateDelay);
-
-					// Setup print writer
-					out = new PrintWriter(fileWriter);
+					
 					statusBuffer = new int[statusBufferSize][4];
-			    lineStart = 0;
-
-			    threadpool = Executors.newFixedThreadPool(threadPoolSize);
-
-			    for (int i=0; i<stepSize; i++) {
-			    	int discs = start+i*interval;
-			    	TOHRunnable runnable = new TOHRunnable(self, discs);
-			    	threadpool.execute(runnable);
-			    }
-
-			    threadpool.shutdown();
-			    threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-
-			    // Close print writer
-			    out.close();
+				    lineStart = 0;
+	
+				    threadpool = Executors.newFixedThreadPool(threadPoolSize);
+	
+				    for (int i=0; i<stepSize; i++) {
+				    	int discs = start+i*interval;
+				    	TOHRunnable runnable = new TOHRunnable(self, discs, silent);
+				    	threadpool.execute(runnable);
+				    }
+	
+				    threadpool.shutdown();
+				    threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 
 					hasCancelled = false;
 					threadpool = null;
@@ -293,7 +293,7 @@ public class TOHGUI implements TOHRDelegate {
 							btnExecute.setText("Execute");
 						}
 					});
-				} catch (IOException|InterruptedException e) {
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -316,7 +316,14 @@ public class TOHGUI implements TOHRDelegate {
 	@Override
 	public void finished(long[] elapsed, int discs) {
 		updateStatus(discs, -4, 0, 0);
-		out.println("TOH "+discs+": "+elapsed[0]+" "+elapsed[1]+" "+elapsed[2]);
+		try {
+			FileWriter fileWriter = new FileWriter(file, true);
+			fileWriter.write("TOH "+discs+": "+elapsed[0]+" "+elapsed[1]+" "+elapsed[2]+System.lineSeparator());
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }
