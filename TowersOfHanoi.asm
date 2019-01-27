@@ -1,10 +1,10 @@
-global Java_JNITowersOfHanoi_TowersOfHanoi
+global Java_cmsc142mp01_JNITowersOfHanoi_towersOfHanoi
 
 section .data
 
 section .text
 
-Java_JNITowersOfHanoi_TowersOfHanoi:
+Java_cmsc142mp01_JNITowersOfHanoi_towersOfHanoi
     ; WINDOWS VER
     ; For other os: r8 -> rdx; r9 -> rcx; r10 -> r8; r11 -> r9
 
