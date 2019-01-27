@@ -1,0 +1,4 @@
+nasm -f win64 TowersOfHanoi.asm -o TowersOfHanoi.o
+gcc -shared -o libTowersOfHanoi.dll TowersOfHanoi.o
+javac *.java
+java JNITowersOfHanoi

@@ -73,7 +73,7 @@ public class TOHGUI implements TOHRDelegate {
 			for (int i=0; i<statusBufferSize; i++) {
 				int line = (i+lineNow)%statusBufferSize;
 				int[] status = statusBuffer[line];
-				
+
 				if (status != null && status[0] != 0) {
 					console += "TOH "+status[0]+": ";
 					switch (status[1]) {
@@ -112,6 +112,9 @@ public class TOHGUI implements TOHRDelegate {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		File library = new File("libTowersOfHanoi.dll");
+		System.load(library.getAbsolutePath());
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -181,7 +184,7 @@ public class TOHGUI implements TOHRDelegate {
 		panel_1.setBorder(new EmptyBorder(0, 0, 0, 0));
 		panel.add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
-		
+
 		textFieldLines = new JTextField(statusBufferSize+"");
 		panel_1.add(textFieldLines, BorderLayout.CENTER);
 		textFieldLines.setColumns(10);
@@ -189,7 +192,7 @@ public class TOHGUI implements TOHRDelegate {
 		JLabel lblNewLabel_1 = new JLabel("Lines Buffer ");
 		panel_1.add(lblNewLabel_1, BorderLayout.WEST);
 
-		chckbxSilent = new JCheckBox("Silent (Recursions Only)");
+		chckbxSilent = new JCheckBox("Silent (Recursions Only, Native)");
 		panel_1.add(chckbxSilent, BorderLayout.EAST);
 		chckbxSilent.setSelected(true);
 
@@ -197,7 +200,7 @@ public class TOHGUI implements TOHRDelegate {
 		panel_2.setBorder(new EmptyBorder(0, 0, 5, 0));
 		panel_1.add(panel_2, BorderLayout.NORTH);
 		panel_2.setLayout(new BorderLayout(0, 0));
-				
+
 		JLabel lblNewLabel = new JLabel("Threads ");
 		panel_2.add(lblNewLabel, BorderLayout.WEST);
 
@@ -247,7 +250,7 @@ public class TOHGUI implements TOHRDelegate {
 		JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
 		int returnValue = fileChooser.showSaveDialog(null);
-		
+
 
 		if (returnValue != JFileChooser.APPROVE_OPTION)
 			return;
@@ -268,18 +271,18 @@ public class TOHGUI implements TOHRDelegate {
 						};
 					};
 					updater.scheduleAtFixedRate(timerTask, updateDelay, updateDelay);
-					
+
 					statusBuffer = new int[statusBufferSize][4];
 				    lineStart = 0;
-	
+
 				    threadpool = Executors.newFixedThreadPool(threadPoolSize);
-	
+
 				    for (int i=0; i<stepSize; i++) {
 				    	int discs = start+i*interval;
 				    	TOHRunnable runnable = new TOHRunnable(self, discs, silent);
 				    	threadpool.execute(runnable);
 				    }
-	
+
 				    threadpool.shutdown();
 				    threadpool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 
