@@ -1,4 +1,8 @@
+cd Towers-of-Hanoi-Threaded-Simulator
 nasm -f win64 TowersOfHanoi.asm -o TowersOfHanoi.o
+nasm -f win64 TowersOfHanoiZero.asm -o TowersOfHanoiZero.o
 gcc -shared -o libTowersOfHanoi.dll TowersOfHanoi.o
-javac *.java
-java JNITowersOfHanoi
+gcc -shared -o libTowersOfHanoiZero.dll TowersOfHanoiZero.o
+javac cmsc142mp01/*.java
+java -Xss2M cmsc142mp01/TOHGUI
+PAUSE
