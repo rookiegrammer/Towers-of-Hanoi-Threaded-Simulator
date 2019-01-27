@@ -107,12 +107,16 @@ public class TOHGUI implements TOHRDelegate {
 	};
 	private JScrollPane scrollPane;
 	private JCheckBox chckbxSilent;
+	private JCheckBox chckbxSingles;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		File library = new File("libTowersOfHanoi.dll");
+		System.load(library.getAbsolutePath());
+
+		library = new File("libTowersOfHanoiZero.dll");
 		System.load(library.getAbsolutePath());
 
 		EventQueue.invokeLater(new Runnable() {
@@ -192,6 +196,8 @@ public class TOHGUI implements TOHRDelegate {
 		JLabel lblNewLabel_1 = new JLabel("Lines Buffer ");
 		panel_1.add(lblNewLabel_1, BorderLayout.WEST);
 
+
+
 		chckbxSilent = new JCheckBox("Silent (Recursions Only, Native)");
 		panel_1.add(chckbxSilent, BorderLayout.EAST);
 		chckbxSilent.setSelected(true);
@@ -207,6 +213,10 @@ public class TOHGUI implements TOHRDelegate {
 		textFieldThreads = new JTextField(threadPoolSize+"");
 		panel_2.add(textFieldThreads, BorderLayout.CENTER);
 		textFieldThreads.setColumns(10);
+
+		chckbxSingles = new JCheckBox("Singles (Divide 3 runs into tasks)");
+		panel_2.add(chckbxSingles, BorderLayout.EAST);
+		chckbxSingles.setSelected(true);
 
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -262,6 +272,7 @@ public class TOHGUI implements TOHRDelegate {
 			public void run() {
 				try {
 					boolean silent = chckbxSilent.isSelected();
+					boolean singles = chckbxSingles.isSelected();
 
 					// Get file
 					updater = new Timer();
@@ -279,8 +290,18 @@ public class TOHGUI implements TOHRDelegate {
 
 				    for (int i=0; i<stepSize; i++) {
 				    	int discs = start+i*interval;
-				    	TOHRunnable runnable = new TOHRunnable(self, discs, silent);
-				    	threadpool.execute(runnable);
+							if (singles) {
+								TOHRunnable runnable = new TOHRunnable(self, discs, silent, 1);
+					    	threadpool.execute(runnable);
+								TOHRunnable runnable2 = new TOHRunnable(self, discs, silent, 2);
+					    	threadpool.execute(runnable2);
+								TOHRunnable runnable3 = new TOHRunnable(self, discs, silent, 3);
+					    	threadpool.execute(runnable3);
+							} else {
+								TOHRunnable runnable = new TOHRunnable(self, discs, silent, 0);
+					    	threadpool.execute(runnable);
+							}
+
 				    }
 
 				    threadpool.shutdown();
@@ -321,7 +342,12 @@ public class TOHGUI implements TOHRDelegate {
 		updateStatus(discs, -4, 0, 0);
 		try {
 			FileWriter fileWriter = new FileWriter(file, true);
-			fileWriter.write("TOH "+discs+": "+elapsed[0]+" "+elapsed[1]+" "+elapsed[2]+System.lineSeparator());
+
+			String s = "";
+			for (int i = 0; i < elapsed.length; i++)
+				s += elapsed[i] + " ";
+
+			fileWriter.write("TOH "+discs+": "+s+System.lineSeparator());
 			fileWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();

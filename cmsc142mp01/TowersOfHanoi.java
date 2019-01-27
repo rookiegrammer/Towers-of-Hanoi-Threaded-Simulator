@@ -27,7 +27,6 @@ public class TowersOfHanoi {
 
 		// Do solving
 		if (silent){
-			
 			JNITowersOfHanoi.towersOfHanoi(n);
 		}
 		else _solve(n, 1, 2, 3);

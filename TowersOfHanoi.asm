@@ -4,7 +4,7 @@ section .data
 
 section .text
 
-Java_cmsc142mp01_JNITowersOfHanoi_towersOfHanoi
+Java_cmsc142mp01_JNITowersOfHanoi_towersOfHanoi:
     ; WINDOWS VER
     ; For other os: r8 -> rdx; r9 -> rcx; r10 -> r8; r11 -> r9
 
